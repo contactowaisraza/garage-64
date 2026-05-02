@@ -1,0 +1,87 @@
+
+{
+  "observer": {
+    "name": "مراقب",
+    "price": "مجاناً",
+    "description": "مثالي لعشاق السيارات",
+    "adLimit": "حد 3 إعلانات",
+    "listingType": "عرض فقط",
+    "messaging": "بدون رسائل",
+    "icon": "👁️",
+    "badge": ""
+  },
+  "hobbyist": {
+    "name": "هاوي",
+    "price": "1,000 دينار",
+    "description": "للبائعين العرضيين",
+    "adLimit": "حد 3 إعلانات",
+    "listingType": "بيع أو عرض",
+    "messaging": "الرسائل مفعلة",
+    "icon": "🔧",
+    "badge": ""
+  },
+  "collector": {
+    "name": "جامع",
+    "price": "7,000 دينار",
+    "description": "لجامعي السيارات النشطين",
+    "adLimit": "حد 7 إعلانات",
+    "listingType": "بيع أو عرض",
+    "messaging": "الرسائل مفعلة",
+    "icon": "🛒",
+    "badge": ""
+  },
+  "dealer": {
+    "name": "تاجر",
+    "price": "15,000 دينار",
+    "description": "للتجار المحترفين",
+    "adLimit": "حد 21 إعلان",
+    "listingType": "بيع أو عرض",
+    "messaging": "الرسائل مفعلة",
+    "icon": "⭐",
+    "badge": "موافقة ذات أولوية"
+  },
+  "signup": {
+    "qiCard": {
+      "label": "إثبات الدفع عبر بطاقة كي",
+      "instruction": "يرجى رفع إيصال الدفع الخاص بك. الحد الأقصى 5 ميجابايت (JPG، PNG، PDF).",
+      "buttonText": "رفع ملف",
+      "errorRequired": "إثبات الدفع مطلوب للخطط المدفوعة",
+      "errorFileSize": "يجب أن يكون حجم الملف أقل من 5 ميجابايت",
+      "errorFileType": "نوع الملف غير صالح. يرجى رفع ملف بصيغة JPG أو PNG أو PDF."
+    },
+    "tiers": {
+      "observer": {
+        "name": "مراقب",
+        "price": "مجاناً",
+        "description": "مجاناً - عرض فقط، حد 3 إعلانات",
+        "adLimit": "حد 3 إعلانات",
+        "listingType": "عرض فقط",
+        "messaging": "بدون رسائل"
+      },
+      "hobbyist": {
+        "name": "هاوي",
+        "price": "1,000 دينار",
+        "description": "1,000 دينار - بيع أو عرض، حد 3 إعلانات",
+        "adLimit": "حد 3 إعلانات",
+        "listingType": "بيع أو عرض",
+        "messaging": "الرسائل مفعلة"
+      },
+      "collector": {
+        "name": "جامع",
+        "price": "7,000 دينار",
+        "description": "7,000 دينار - بيع أو عرض، حد 7 إعلانات",
+        "adLimit": "حد 7 إعلانات",
+        "listingType": "بيع أو عرض",
+        "messaging": "الرسائل مفعلة"
+      },
+      "dealer": {
+        "name": "تاجر",
+        "price": "15,000 دينار",
+        "description": "15,000 دينار - بيع أو عرض، حد 21 إعلان",
+        "adLimit": "حد 21 إعلان",
+        "listingType": "بيع أو عرض",
+        "messaging": "الرسائل مفعلة"
+      }
+    }
+  }
+}

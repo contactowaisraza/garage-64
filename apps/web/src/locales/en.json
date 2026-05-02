@@ -1,0 +1,87 @@
+
+{
+  "observer": {
+    "name": "Observer",
+    "price": "Free",
+    "description": "Perfect for car enthusiasts",
+    "adLimit": "3 Ads limit",
+    "listingType": "Showcase Only",
+    "messaging": "No Messaging",
+    "icon": "👁️",
+    "badge": ""
+  },
+  "hobbyist": {
+    "name": "Hobbyist",
+    "price": "1,000 IQD",
+    "description": "For casual sellers",
+    "adLimit": "3 Ads limit",
+    "listingType": "Sell or Showcase",
+    "messaging": "Messaging Enabled",
+    "icon": "🔧",
+    "badge": ""
+  },
+  "collector": {
+    "name": "Collector",
+    "price": "7,000 IQD",
+    "description": "For active collectors",
+    "adLimit": "7 Ads limit",
+    "listingType": "Sell or Showcase",
+    "messaging": "Messaging Enabled",
+    "icon": "🛒",
+    "badge": ""
+  },
+  "dealer": {
+    "name": "Dealer",
+    "price": "15,000 IQD",
+    "description": "For professional dealers",
+    "adLimit": "21 Ads limit",
+    "listingType": "Sell or Showcase",
+    "messaging": "Messaging Enabled",
+    "icon": "⭐",
+    "badge": "Priority Approval"
+  },
+  "signup": {
+    "qiCard": {
+      "label": "Qi Card Payment Proof",
+      "instruction": "Please upload your payment receipt. Max 5MB (JPG, PNG, PDF).",
+      "buttonText": "Upload File",
+      "errorRequired": "Payment proof required for paid tiers",
+      "errorFileSize": "File must be less than 5MB",
+      "errorFileType": "Invalid file type. Please upload a JPG, PNG, or PDF."
+    },
+    "tiers": {
+      "observer": {
+        "name": "Observer",
+        "price": "Free",
+        "description": "Free - Showcase only, 3 Ads",
+        "adLimit": "3 Ads limit",
+        "listingType": "Showcase Only",
+        "messaging": "No Messaging"
+      },
+      "hobbyist": {
+        "name": "Hobbyist",
+        "price": "1,000 IQD",
+        "description": "1,000 IQD - Sell or Showcase, 3 Ads",
+        "adLimit": "3 Ads limit",
+        "listingType": "Sell or Showcase",
+        "messaging": "Messaging Enabled"
+      },
+      "collector": {
+        "name": "Collector",
+        "price": "7,000 IQD",
+        "description": "7,000 IQD - Sell or Showcase, 7 Ads",
+        "adLimit": "7 Ads limit",
+        "listingType": "Sell or Showcase",
+        "messaging": "Messaging Enabled"
+      },
+      "dealer": {
+        "name": "Dealer",
+        "price": "15,000 IQD",
+        "description": "15,000 IQD - Sell or Showcase, 21 Ads",
+        "adLimit": "21 Ads limit",
+        "listingType": "Sell or Showcase",
+        "messaging": "Messaging Enabled"
+      }
+    }
+  }
+}

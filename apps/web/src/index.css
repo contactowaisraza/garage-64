@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Outfit", sans-serif;
+  overflow-x: clip;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* Primary: Brand Orange */
+    --primary: 24 100% 50%;
+    --primary-foreground: 0 0% 10%;
+    
+    /* Secondary: Dark Accent */
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    
+    --accent: 24 100% 50%;
+    --accent-foreground: 0 0% 10%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 24 100% 50%;
+    --radius: 0.75rem;
+
+    /* Subscription Status Indicators */
+    --subscription-active: 142 71% 45%;
+    --subscription-expiring: 24 95% 53%;
+    --subscription-expired: 0 84% 60%;
+
+    /* Tiers */
+    --tier-observer: 0 0% 30%;
+    --tier-hobbyist: 28 57% 46%;
+    --tier-collector: 0 0% 75%;
+    --tier-dealer: 24 100% 50%;
+  }
+
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 24 100% 50%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 24 100% 50%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 24 100% 50%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Rajdhani', sans-serif;
+    text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  .font-mono {
+    font-family: 'Space Mono', monospace;
+  }
+  
+  .glass-panel {
+    @apply bg-card/80 backdrop-blur-md border border-white/5 shadow-xl;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@supports (direction: rtl) {
+  html[dir='rtl'] {
+    direction: rtl;
+  }
+  html[dir='rtl'] body {
+    text-align: right;
+  }
+}
+
+html[dir='rtl'] {
+  direction: rtl;
+}
+
+html[dir='rtl'] * {
+  direction: rtl;
+}

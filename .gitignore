@@ -1,0 +1,40 @@
+# Node / JS
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+out/
+coverage/
+.nyc_output/
+
+# Vite / misc caches
+.vite/
+*.tsbuildinfo
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Archives / temp
+*.tar.gz
+*.zip
+
+# PocketBase (keep hooks/migrations, ignore runtime data/binaries)
+apps/pocketbase/pb_data/
+apps/pocketbase/pb_data_encrypted_backup/
+apps/pocketbase/pb/
+apps/pocketbase/pocketbase
+apps/pocketbase/pocketbase.exe
+
