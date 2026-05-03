@@ -1,7 +1,7 @@
 import Pocketbase from 'pocketbase';
 
 // Use local PocketBase url in development, and relative proxy url in production
-const POCKETBASE_API_URL = import.meta.env.DEV ? "http://127.0.0.1:8090" : "/hcgi/platform";
+const POCKETBASE_API_URL = "https://pocketbase-app-production-6cc4.up.railway.app";
 
 const pocketbaseClient = new Pocketbase(POCKETBASE_API_URL);
 

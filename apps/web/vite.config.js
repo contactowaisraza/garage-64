@@ -294,6 +294,11 @@ export default defineConfig({
 		react(),
 		addTransformIndexHtml
 	],
+	preview: {
+		host: true,
+		port: 3000,
+		allowedHosts: 'all',
+	},
 	server: {
 		port: 3000,
 		cors: true,
@@ -303,6 +308,7 @@ export default defineConfig({
 		allowedHosts: [
 			'.app-preview.com',
 			'.app-preview.io',
+			'web-production-baadb.up.railway.app',
 		],
 		fs: {
 			strict: true,
