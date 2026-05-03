@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "pocketbase.exe serve --http=0.0.0.0:8090 --hooksWatch=false",
-    "start": "pocketbase.exe serve --http=0.0.0.0:8090 --migrationsDir=./pb_migrations --hooksDir=./pb_hooks --hooksWatch=false",
+    "start": "./pocketbase serve --http=0.0.0.0:8090 --migrationsDir=./pb_migrations --hooksDir=./pb_hooks --hooksWatch=false",
     "migrations:up": "pocketbase.exe horizons migrations:up --migrationsDir=./pb_migrations --hooksDir=./pb_hooks --hooksWatch=false",
     "migrations:revert": "pocketbase.exe horizons migrations:revert --migrationsDir=./pb_migrations --hooksDir=./pb_hooks --hooksWatch=false",
     "migrations:snapshot": "mkdir -p ./pb_snapshots && echo 'y' | pocketbase.exe migrate collections --migrationsDir=./pb_snapshots",
