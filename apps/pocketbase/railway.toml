@@ -7,3 +7,13 @@ startCommand = ""
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
+
+[[envs]]
+name = "PB_SUPERUSER_EMAIL"
+description = "PocketBase superadmin email — read by the create_superuser migration"
+required = true
+
+[[envs]]
+name = "PB_SUPERUSER_PASSWORD"
+description = "PocketBase superadmin password — read by the create_superuser migration"
+required = true
