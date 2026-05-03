@@ -105,7 +105,7 @@ const PaymentModal = ({ selectedTier, showModal, onClose, currentUser, isSignUp 
         formData.append('tier', userData.tier);
         formData.append('receipt', file);
 
-        const signupRes = await apiServerClient.fetch('http://localhost:3001/auth/signup-with-payment', {
+        const signupRes = await apiServerClient.fetch('/auth/signup-with-payment', {
           method: 'POST',
           body: formData,
         });
@@ -128,7 +128,7 @@ const PaymentModal = ({ selectedTier, showModal, onClose, currentUser, isSignUp 
         formData.append('tier', selectedTier);
         formData.append('receipt', file);
 
-        const requestRes = await apiServerClient.fetch('http://localhost:3001/users/create-upgrade-request', {
+        const requestRes = await apiServerClient.fetch('/users/create-upgrade-request', {
           method: 'POST',
           body: formData,
         });

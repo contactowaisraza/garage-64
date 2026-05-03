@@ -50,7 +50,7 @@ const RegisterPage = () => {
   const handleObserverSignup = async () => {
     setLoading(true);
     try {
-      const res = await apiServerClient.fetch('http://localhost:3001/auth/signup-observer', {
+      const res = await apiServerClient.fetch('/auth/signup-observer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
