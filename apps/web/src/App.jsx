@@ -53,6 +53,7 @@ function App() {
               <Route path="/diecast/:brand" element={<ProtectedSubscriptionRoute><DiecastBrandListingsPage /></ProtectedSubscriptionRoute>} />
               <Route path="/my-listings" element={<ProtectedSubscriptionRoute><MyListingsPage /></ProtectedSubscriptionRoute>} />
               <Route path="/create-listing" element={<ProtectedSubscriptionRoute><ListingForm /></ProtectedSubscriptionRoute>} />
+              <Route path="/edit-listing/:id" element={<ProtectedSubscriptionRoute><ListingForm /></ProtectedSubscriptionRoute>} />
               <Route path="/messages" element={<ProtectedSubscriptionRoute><MessagesPage /></ProtectedSubscriptionRoute>} />
               <Route path="/messages/:conversationId" element={<ProtectedSubscriptionRoute><ChatDetailPage /></ProtectedSubscriptionRoute>} />
               <Route path="/payment-history" element={<ProtectedSubscriptionRoute><PaymentHistoryPage /></ProtectedSubscriptionRoute>} />

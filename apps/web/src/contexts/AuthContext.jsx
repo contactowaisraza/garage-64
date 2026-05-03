@@ -9,14 +9,30 @@ export const AuthProvider = ({ children }) => {
   const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
-    if (pb.authStore.isValid && pb.authStore.model) {
-      setCurrentUser(pb.authStore.model);
-    }
-    setInitialLoading(false);
+    const initAuth = async () => {
+      if (pb.authStore.isValid && pb.authStore.model) {
+        // Only refresh tokens that belong to the users collection.
+        // Admin collection tokens must not be touched here — AdminAuthContext owns them.
+        if (pb.authStore.model.collectionName === 'users') {
+          try {
+            const authData = await pb.collection('users').authRefresh({ $autoCancel: false });
+            setCurrentUser(authData.record);
+          } catch {
+            pb.authStore.clear();
+            setCurrentUser(null);
+          }
+        }
+      }
+      setInitialLoading(false);
+    };
 
-    // Listen for auth store changes to keep state in sync across tabs
+    initAuth();
+
+    // Keep state in sync across tabs, but only for user-collection tokens
     const unsubscribe = pb.authStore.onChange((token, model) => {
-      setCurrentUser(model);
+      if (!model || model.collectionName === 'users') {
+        setCurrentUser(model);
+      }
     });
 
     return () => {

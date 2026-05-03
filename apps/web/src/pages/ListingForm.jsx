@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +15,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { BadgeInfo as InfoIcon } from 'lucide-react';
+import { BadgeInfo as InfoIcon, Upload } from 'lucide-react';
 
 const TIER_LIMITS = {
   observer: 3,
@@ -28,14 +28,19 @@ const ListingForm = () => {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = !!id;
+
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [adCount, setAdCount] = useState(0);
-  const [checkingLimit, setCheckingLimit] = useState(true);
-  
-  const userTier = currentUser?.tier?.toLowerCase() || 'observer';
+  const [checkingLimit, setCheckingLimit] = useState(!isEditMode);
+  const [existingImages, setExistingImages] = useState([]);
+
+  const userTier = currentUser?.subscription_tier?.toLowerCase();
   const adLimit = TIER_LIMITS[userTier] || 3;
   const isObserver = userTier === 'observer';
-  const isLimitReached = adCount >= adLimit;
+  const isLimitReached = !isEditMode && adCount >= adLimit;
 
   const [formData, setFormData] = useState({
     title: '',
@@ -51,6 +56,31 @@ const ListingForm = () => {
   const conditions = ['Mint', 'Near Mint', 'Excellent', 'Good', 'Fair', 'Poor'];
 
   useEffect(() => {
+    if (isEditMode) {
+      const loadListing = async () => {
+        try {
+          const record = await pb.collection('listings').getOne(id, { $autoCancel: false });
+          setFormData({
+            title: record.title || '',
+            description: record.description || '',
+            category: record.category || '',
+            listingType: record.listingType || 'showcase',
+            price: record.price || '',
+            condition: record.condition || ''
+          });
+          setExistingImages(record.images || []);
+        } catch (error) {
+          console.error('Error loading listing:', error);
+          toast.error(t('common.error') || 'Failed to load listing');
+          navigate('/my-listings');
+        } finally {
+          setInitialLoading(false);
+        }
+      };
+      loadListing();
+      return;
+    }
+
     const checkAdLimit = async () => {
       if (!currentUser) return;
       try {
@@ -66,7 +96,7 @@ const ListingForm = () => {
       }
     };
     checkAdLimit();
-  }, [currentUser]);
+  }, [currentUser, id, isEditMode]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -80,8 +110,8 @@ const ListingForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (isLimitReached) {
+
+    if (!isEditMode && isLimitReached) {
       toast.error(`Ad limit reached for your tier (${adLimit} ads max).`);
       return;
     }
@@ -93,25 +123,32 @@ const ListingForm = () => {
       data.append('title', formData.title);
       data.append('description', formData.description);
       data.append('category', formData.category);
-      
+
       const finalListingType = isObserver ? 'showcase' : formData.listingType;
       data.append('listingType', finalListingType);
-      
+
       if (finalListingType === 'sell' && !isObserver) {
         data.append('price', formData.price);
       }
-      
+
       data.append('condition', formData.condition);
-      data.append('user_id', currentUser.id);
       data.append('status', 'Pending');
       data.append('isDealerAd', userTier === 'dealer');
 
-      images.forEach(file => {
-        data.append('images', file);
-      });
+      if (images.length > 0) {
+        images.forEach(file => data.append('images', file));
+      }
 
-      await pb.collection('listings').create(data, { $autoCancel: false });
-      toast.success(t('listings.successCreated') || 'Listing created successfully');
+      if (isEditMode) {
+        data.append('rejection_reason', '');
+        await pb.collection('listings').update(id, data, { $autoCancel: false });
+        toast.success(t('listings.resubmitSuccess') || 'Listing resubmitted for review');
+      } else {
+        data.append('user_id', currentUser.id);
+        await pb.collection('listings').create(data, { $autoCancel: false });
+        toast.success(t('listings.successCreated') || 'Listing created successfully');
+      }
+
       navigate('/my-listings');
     } catch (error) {
       console.error(error);
@@ -121,26 +158,38 @@ const ListingForm = () => {
     }
   };
 
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <p className="text-muted-foreground">{t('common.loading') || 'Loading...'}</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <>
       <Helmet>
-        <title>{`${t('listings.createListing') || 'Create Listing'} - ${t('brand.name') || 'App'}`}</title>
+        <title>{`${isEditMode ? (t('listings.editListing') || 'Edit Listing') : (t('listings.createListing') || 'Create Listing')} - ${t('brand.name') || 'App'}`}</title>
       </Helmet>
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        
-        <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
+
+        <main className="flex-1 container mx-auto px-4 py-32 max-w-3xl">
           <Card className="shadow-lg border-border">
             <CardHeader className="space-y-3">
               <CardTitle className="text-3xl font-bold tracking-tight">
-                {t('listings.createListing') || 'Create New Listing'}
+                {isEditMode ? (t('listings.editListing') || 'Edit & Resubmit Listing') : (t('listings.createListing') || 'Create New Listing')}
               </CardTitle>
-              {!checkingLimit && (
+              {!isEditMode && !checkingLimit && (
                 <CardDescription className="flex items-center gap-2 text-base">
-                  <span className="font-medium text-foreground capitalize">{userTier} Tier</span>
+                  <span className="font-medium text-foreground capitalize">{userTier} {t('tiers.tierLabel') || 'Tier'}</span>
                   <span className="text-muted-foreground">•</span>
                   <span className={`${isLimitReached ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
-                    You have {adCount} of {adLimit} ads
+                    {adCount} / {adLimit}
                   </span>
                 </CardDescription>
               )}
@@ -150,139 +199,200 @@ const ListingForm = () => {
                 <Alert variant="destructive" className="mb-6">
                   <InfoIcon className="h-4 w-4" />
                   <AlertDescription>
-                    You have reached your tier's ad limit ({adLimit} ads). Please upgrade your tier to post more listings.
+                    {t('listings.adLimitReached')?.replace('{limit}', adLimit) || `Ad limit reached (${adLimit} ads). Please upgrade your tier to post more listings.`}
                   </AlertDescription>
                 </Alert>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
+
+                {/* Title */}
                 <div className="space-y-2">
-                  <Label htmlFor="title">{t('listings.title') || 'Title'}</Label>
-                  <Input 
-                    id="title" 
-                    name="title" 
-                    required 
-                    value={formData.title} 
-                    onChange={handleChange} 
+                  <Label htmlFor="title" className="text-sm font-semibold">
+                    {t('listings.title')} <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="title"
+                    name="title"
+                    required
+                    placeholder={t('listings.titlePlaceholder')}
+                    value={formData.title}
+                    onChange={handleChange}
                     disabled={isLimitReached}
                     className="bg-background"
                   />
+                  <p className="text-xs text-muted-foreground">{t('listings.titleHelper')}</p>
                 </div>
 
+                {/* Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="description">{t('listings.description') || 'Description'}</Label>
-                  <Textarea 
-                    id="description" 
-                    name="description" 
-                    rows={4} 
-                    value={formData.description} 
-                    onChange={handleChange} 
+                  <Label htmlFor="description" className="text-sm font-semibold">
+                    {t('listings.description')}
+                  </Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    rows={4}
+                    placeholder={t('listings.descriptionPlaceholder')}
+                    value={formData.description}
+                    onChange={handleChange}
                     disabled={isLimitReached}
                     className="bg-background resize-none"
                   />
+                  <p className="text-xs text-muted-foreground">{t('listings.descriptionHelper')}</p>
                 </div>
 
+                {/* Category & Condition */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label>{t('listings.category') || 'Category'}</Label>
-                    <Select 
-                      required 
-                      value={formData.category} 
+                    <Label className="text-sm font-semibold">
+                      {t('listings.category')} <span className="text-destructive">*</span>
+                    </Label>
+                    <Select
+                      required
+                      value={formData.category}
                       onValueChange={(v) => setFormData({...formData, category: v})}
                       disabled={isLimitReached}
                     >
                       <SelectTrigger className="bg-background">
-                        <SelectValue placeholder={t('common.select') || 'Select...'} />
+                        <SelectValue placeholder={t('listings.categoryPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground">{t('listings.categoryHelper')}</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>{t('listings.condition') || 'Condition'}</Label>
-                    <Select 
-                      required 
-                      value={formData.condition} 
+                    <Label className="text-sm font-semibold">
+                      {t('listings.condition')} <span className="text-destructive">*</span>
+                    </Label>
+                    <Select
+                      required
+                      value={formData.condition}
                       onValueChange={(v) => setFormData({...formData, condition: v})}
                       disabled={isLimitReached}
                     >
                       <SelectTrigger className="bg-background">
-                        <SelectValue placeholder={t('common.select') || 'Select...'} />
+                        <SelectValue placeholder={t('listings.conditionPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {conditions.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground">{t('listings.conditionHelper')}</p>
                   </div>
                 </div>
 
-                <div className="space-y-4 bg-muted/50 p-4 rounded-xl border border-border/50">
-                  <Label className="text-base">{t('listings.type') || 'Listing Type'}</Label>
-                  <RadioGroup 
-                    value={isObserver ? 'showcase' : formData.listingType} 
+                {/* Listing Type */}
+                <div className="space-y-3 bg-muted/50 p-5 rounded-xl border border-border/50">
+                  <div>
+                    <Label className="text-sm font-semibold">
+                      {t('listings.type')} <span className="text-destructive">*</span>
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t('listings.listingTypeQuestion')}</p>
+                  </div>
+                  <RadioGroup
+                    value={isObserver ? 'showcase' : formData.listingType}
                     onValueChange={(v) => setFormData({...formData, listingType: v})}
                     disabled={isObserver || isLimitReached}
-                    className="flex flex-col sm:flex-row gap-6"
+                    className="flex flex-col sm:flex-row gap-4"
                   >
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="showcase" id="type-showcase" />
-                      <Label htmlFor="type-showcase" className="cursor-pointer font-medium">Showcase Only</Label>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="sell" id="type-sell" disabled={isObserver || isLimitReached} />
-                      <Label htmlFor="type-sell" className={`cursor-pointer font-medium ${isObserver ? 'text-muted-foreground' : ''}`}>
-                        For Sale
-                      </Label>
-                    </div>
+                    <label htmlFor="type-showcase" className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${(isObserver ? 'showcase' : formData.listingType) === 'showcase' ? 'border-primary bg-primary/5' : 'border-border bg-background hover:bg-muted/40'}`}>
+                      <RadioGroupItem value="showcase" id="type-showcase" className="mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">{t('listings.showcaseOnly')}</p>
+                        <p className="text-xs text-muted-foreground">{t('listings.showcaseDescription')}</p>
+                      </div>
+                    </label>
+                    <label htmlFor="type-sell" className={`flex items-start gap-3 p-4 rounded-lg border transition-colors ${isObserver || isLimitReached ? 'cursor-not-allowed opacity-50 border-border bg-background' : `cursor-pointer ${formData.listingType === 'sell' ? 'border-primary bg-primary/5' : 'border-border bg-background hover:bg-muted/40'}`}`}>
+                      <RadioGroupItem value="sell" id="type-sell" disabled={isObserver || isLimitReached} className="mt-0.5" />
+                      <div>
+                        <p className="font-medium text-sm">{t('listings.forSale')}</p>
+                        <p className="text-xs text-muted-foreground">{t('listings.forSaleDescription')}</p>
+                      </div>
+                    </label>
                   </RadioGroup>
-                  
+
                   {isObserver && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-2 mt-2">
-                      <InfoIcon className="w-4 h-4" />
-                      Observer tier can only showcase cars. Upgrade to sell.
+                    <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <InfoIcon className="w-3.5 h-3.5" />
+                      {t('listings.observerUpgradeHint')}
                     </p>
                   )}
                 </div>
 
+                {/* Price */}
                 {formData.listingType === 'sell' && !isObserver && (
                   <div className="space-y-2">
-                    <Label htmlFor="price">{t('listings.price') || 'Price'}</Label>
-                    <Input 
-                      id="price" 
-                      name="price" 
-                      type="number" 
-                      min="0" 
-                      step="0.01" 
-                      required 
-                      value={formData.price} 
-                      onChange={handleChange} 
-                      disabled={isLimitReached}
-                      className="bg-background"
-                    />
+                    <Label htmlFor="price" className="text-sm font-semibold">
+                      {t('listings.price')} <span className="text-destructive">*</span>
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium select-none">SAR</span>
+                      <Input
+                        id="price"
+                        name="price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        required
+                        placeholder={t('listings.pricePlaceholder')}
+                        value={formData.price}
+                        onChange={handleChange}
+                        disabled={isLimitReached}
+                        className="bg-background pl-12"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t('listings.priceHelper')}</p>
                   </div>
                 )}
 
+                {/* Images */}
                 <div className="space-y-2">
-                  <Label htmlFor="images">{t('listings.images') || 'Images'}</Label>
-                  <Input 
-                    id="images" 
-                    type="file" 
-                    multiple 
-                    accept="image/*" 
-                    onChange={handleFileChange} 
-                    disabled={isLimitReached}
-                    className="cursor-pointer bg-background file:text-foreground file:bg-muted file:border-0 file:mr-4 file:px-4 file:py-2 file:rounded-md hover:file:bg-muted/80" 
-                  />
+                  <Label htmlFor="images" className="text-sm font-semibold">
+                    {t('listings.images')}
+                  </Label>
+                  {isEditMode && existingImages.length > 0 && images.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {existingImages.length} {existingImages.length === 1 ? 'photo' : 'photos'} currently attached — upload new photos to replace them
+                    </p>
+                  )}
+                  <label
+                    htmlFor="images"
+                    className={`flex flex-col items-center justify-center gap-2 w-full py-8 border-2 border-dashed rounded-xl transition-colors cursor-pointer ${isLimitReached ? 'opacity-50 cursor-not-allowed border-border' : 'border-border hover:border-primary/50 hover:bg-primary/5'}`}
+                  >
+                    <Upload className="w-6 h-6 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">
+                      {images.length > 0
+                        ? t('listings.filesSelected')?.replace('{count}', images.length)
+                        : t('listings.uploadPhotos')}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{t('listings.uploadFormats')}</span>
+                    <Input
+                      id="images"
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      disabled={isLimitReached}
+                      className="hidden"
+                    />
+                  </label>
+                  <p className="text-xs text-muted-foreground">{t('listings.imagesHelper')}</p>
                 </div>
 
                 <div className="pt-6 flex justify-end gap-4 border-t border-border">
                   <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-                    {t('common.cancel') || 'Cancel'}
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" disabled={loading || isLimitReached || checkingLimit}>
-                    {loading ? (t('common.loading') || 'Loading...') : (t('listings.submit') || 'Create Listing')}
+                    {loading
+                      ? t('listings.submitting')
+                      : isEditMode
+                        ? (t('listings.resubmit') || 'Resubmit')
+                        : t('listings.submit')}
                   </Button>
                 </div>
               </form>

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, Trash2, Eye, ShieldAlert } from 'lucide-react';
+import { Plus, Trash2, Eye, ShieldAlert, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 const TIER_LIMITS = {
@@ -27,7 +27,7 @@ const MyListingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [totalAds, setTotalAds] = useState(0);
 
-  const userTier = currentUser?.tier?.toLowerCase() || 'observer';
+  const userTier = currentUser?.subscription_tier?.toLowerCase() || 'observer';
   const adLimit = TIER_LIMITS[userTier] || 3;
   const isLimitReached = totalAds >= adLimit;
 
@@ -90,7 +90,7 @@ const MyListingsPage = () => {
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         
-        <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl">
+        <main className="flex-1 container mx-auto px-4 py-32 max-w-6xl">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
@@ -188,7 +188,7 @@ const MyListingsPage = () => {
                         <div className="flex flex-col gap-1 items-start">
                           {getStatusBadge(listing.status)}
                           {listing.status === 'Rejected' && listing.rejection_reason && (
-                            <span className="text-xs text-destructive max-w-[200px] truncate" title={listing.rejection_reason}>
+                            <span className="text-xs text-destructive max-w-[220px]" title={listing.rejection_reason}>
                               {listing.rejection_reason}
                             </span>
                           )}
@@ -196,6 +196,19 @@ const MyListingsPage = () => {
                       </TableCell>
                       <TableCell className="py-4 text-right">
                         <div className="flex justify-end gap-2">
+                          {listing.status === 'Rejected' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              asChild
+                              className="h-8 gap-1.5 text-xs border-primary/30 text-primary"
+                            >
+                              <Link to={`/edit-listing/${listing.id}`}>
+                                <RefreshCw className="w-3.5 h-3.5" />
+                                {t('listings.resubmit') || 'Resubmit'}
+                              </Link>
+                            </Button>
+                          )}
                           <Button size="icon" variant="ghost" asChild className="hover:bg-primary/10 hover:text-primary">
                             <Link to={`/listing/${listing.id}`}>
                               <Eye className="w-4 h-4" />
