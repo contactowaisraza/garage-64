@@ -1,8 +1,9 @@
-const API_SERVER_URL = "https://api-production-0b7a.up.railway.app";
+const API_SERVER_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 const apiServerClient = {
     fetch: async (url, options = {}) => {
-        return await window.fetch(API_SERVER_URL + url, options);
+        const fullUrl = url.startsWith('http') ? url : `${API_SERVER_URL}${url}`;
+        return await window.fetch(fullUrl, options);
     }
 };
 

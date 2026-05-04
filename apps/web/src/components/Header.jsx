@@ -29,7 +29,7 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated && (currentUser?.tier === 'Collector' || currentUser?.tier === 'Dealer')) {
+    if (isAuthenticated && (currentUser?.tier === 'Hobbyist' || currentUser?.tier === 'Collector' || currentUser?.tier === 'Dealer')) {
       fetchUnreadCount();
     }
   }, [isAuthenticated, currentUser]);
@@ -65,7 +65,7 @@ const Header = () => {
   };
 
   const isActive = (path) => location.pathname === path;
-  const showMessagesLink = isAuthenticated && !isAdmin && (currentUser?.tier === 'Collector' || currentUser?.tier === 'Dealer');
+  const showMessagesLink = isAuthenticated && !isAdmin && (currentUser?.tier === 'Hobbyist' || currentUser?.tier === 'Collector' || currentUser?.tier === 'Dealer');
 
   const headerBg = scrolled || !isHomePage || mobileMenuOpen
     ? 'bg-[#1a1a1a] shadow-md border-b border-[#2a2a2a]' 
@@ -79,7 +79,7 @@ const Header = () => {
       <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className={`bilingual-heading uppercase font-medium premium-transition ${mobile ? 'text-xl py-2' : 'text-xs'} ${isActive('/browse') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`}>
         {t('nav.browse')}
       </Link>
-      <Link to="/bazaar" onClick={() => setMobileMenuOpen(false)} className={`bilingual-heading uppercase font-medium premium-transition ${mobile ? 'text-xl py-2' : 'text-xs'} ${isActive('/bazaar') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`}>
+      <Link to="/bazar" onClick={() => setMobileMenuOpen(false)} className={`bilingual-heading uppercase font-medium premium-transition ${mobile ? 'text-xl py-2' : 'text-xs'} ${isActive('/bazaar') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`}>
         {t('nav.bazaar')}
       </Link>
 

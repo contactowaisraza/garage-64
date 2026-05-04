@@ -51,6 +51,12 @@ const translations = {
     importUsers: 'Import Users',
     totalUsers: 'Total Users',
     dashboard: 'Admin Control Panel',
+    // Users tab
+    usersTab: 'Users',
+    tierLabel: 'Tier',
+    subscriptionStatus: 'Sub. Status',
+    joined: 'Joined',
+    noUsers: 'No users found',
     // Listings tab
     listingsTab: 'Listings',
     allListings: 'All Listings',
@@ -100,6 +106,12 @@ const translations = {
     importUsers: 'استيراد مستخدمين',
     totalUsers: 'إجمالي المستخدمين',
     dashboard: 'لوحة تحكم المسؤول',
+    // Users tab
+    usersTab: 'المستخدمون',
+    tierLabel: 'الباقة',
+    subscriptionStatus: 'حالة الاشتراك',
+    joined: 'تاريخ الانضمام',
+    noUsers: 'لا يوجد مستخدمون',
     // Listings tab
     listingsTab: 'الإعلانات',
     allListings: 'جميع الإعلانات',
@@ -145,6 +157,9 @@ const getStatusBadge = (status) => {
   }
 };
 
+const TIER_PRIORITY = { dealer: 0, collector: 1, hobbyist: 2, observer: 3 };
+const tierRank = (tier) => TIER_PRIORITY[tier?.toLowerCase()] ?? 4;
+
 const AdminDashboard = () => {
   const { language, isRTL } = useLanguage();
   const { currentUser } = useAuth();
@@ -176,6 +191,11 @@ const AdminDashboard = () => {
   const [viewingListing, setViewingListing] = useState(null);
   const [viewImageIndex, setViewImageIndex] = useState(0);
 
+  // All users state
+  const [allUsers, setAllUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersFetched, setUsersFetched] = useState(false);
+
   const fetchPendingRequests = async () => {
     setLoading(true);
     setErrorMsg(null);
@@ -186,7 +206,7 @@ const AdminDashboard = () => {
         sort: '-created',
         $autoCancel: false
       });
-      setPendingRequests(res.items);
+      setPendingRequests([...res.items].sort((a, b) => tierRank(a.tier) - tierRank(b.tier)));
     } catch (error) {
       console.error('Error fetching admin data:', error);
       setErrorMsg(t.errorFetching);
@@ -226,12 +246,31 @@ const AdminDashboard = () => {
         const map = {};
         usersRes.items.forEach(u => { map[u.id] = u; });
         setUsersMap(map);
+        setPendingListings(prev =>
+          [...prev].sort((a, b) => tierRank(map[a.user_id]?.subscription_tier) - tierRank(map[b.user_id]?.subscription_tier))
+        );
       }
     } catch (error) {
       console.error('Error fetching listings:', error);
       setListingsError(error?.message || 'Failed to fetch listings');
     } finally {
       setListingsLoading(false);
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const res = await pb.collection('users').getList(1, 500, {
+        sort: '-created',
+        $autoCancel: false
+      });
+      setAllUsers(res.items);
+      setUsersFetched(true);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setUsersLoading(false);
     }
   };
 
@@ -368,6 +407,7 @@ const AdminDashboard = () => {
           <TableRow className="border-border">
             <TableHead className="py-4">{t.listingTitle}</TableHead>
             <TableHead className="py-4">{t.postedBy}</TableHead>
+            <TableHead className="py-4">{t.tierLabel}</TableHead>
             <TableHead className="py-4">{t.category}</TableHead>
             <TableHead className="py-4">{t.type}</TableHead>
             {!isPendingView && <TableHead className="py-4">{t.status}</TableHead>}
@@ -380,6 +420,7 @@ const AdminDashboard = () => {
               <TableRow key={i} className="border-border">
                 <TableCell><div className="flex items-center gap-3"><Skeleton className="w-12 h-12 rounded-lg" /><Skeleton className="h-4 w-36" /></div></TableCell>
                 <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
                 <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
                 {!isPendingView && <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>}
@@ -388,7 +429,7 @@ const AdminDashboard = () => {
             ))
           ) : rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={isPendingView ? 5 : 6} className="text-center py-16 text-muted-foreground">
+              <TableCell colSpan={isPendingView ? 6 : 7} className="text-center py-16 text-muted-foreground">
                 <div className="flex flex-col items-center gap-3">
                   <LayoutList className="w-10 h-10 opacity-20" />
                   <p className="font-medium">{isPendingView ? t.noPendingListings : t.noListings}</p>
@@ -418,6 +459,11 @@ const AdminDashboard = () => {
                   </TableCell>
                   <TableCell className="py-3 text-sm text-muted-foreground">
                     {user?.name || user?.email || '—'}
+                  </TableCell>
+                  <TableCell className="py-3">
+                    <Badge variant="outline" className={`text-xs font-semibold capitalize ${getTierBadgeStyle(user?.subscription_tier)}`}>
+                      {formatTierName(user?.subscription_tier) || 'Observer'}
+                    </Badge>
                   </TableCell>
                   <TableCell className="py-3 text-sm text-muted-foreground">{listing.category}</TableCell>
                   <TableCell className="py-3">
@@ -488,7 +534,7 @@ const AdminDashboard = () => {
           </div>
 
           <Tabs
-            defaultValue="pending"
+            defaultValue="users"
             className="w-full"
             dir={isRTL ? 'rtl' : 'ltr'}
             onValueChange={(val) => {
@@ -496,8 +542,13 @@ const AdminDashboard = () => {
             }}
           >
             <TabsList className="bg-muted border border-border mb-6 p-1 flex-wrap h-auto">
-              <TabsTrigger value="pending" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded px-6 py-2">
-                {t.pendingApprovals} ({pendingRequests.length})
+              <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded px-6 py-2 flex items-center gap-2">
+                {t.usersTab}
+                {pendingRequests.length > 0 && (
+                  <span className="ml-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full px-1.5 py-0.5 leading-none">
+                    {pendingRequests.length}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="listings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded px-6 py-2 flex items-center gap-2">
                 <LayoutList className="w-4 h-4" />
@@ -508,121 +559,218 @@ const AdminDashboard = () => {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded px-6 py-2">
-                {t.allUsers}
-              </TabsTrigger>
               <TabsTrigger value="import" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded px-6 py-2 flex items-center gap-2">
                 <Upload className="w-4 h-4" />
                 {t.importUsers}
               </TabsTrigger>
             </TabsList>
 
-            {/* Payment pending approvals */}
-            <TabsContent value="pending">
-              <Card className="bg-card shadow-lg border-border">
-                <CardHeader>
-                  <CardTitle>{t.pendingApprovals}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-xl border border-border overflow-hidden bg-background">
-                    <Table dir={isRTL ? 'rtl' : 'ltr'}>
-                      <TableHeader className="bg-muted/50">
-                        <TableRow className="border-border">
-                          <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.user}</TableHead>
-                          <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.email}</TableHead>
-                          <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.requestedTier}</TableHead>
-                          <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.requestDate}</TableHead>
-                          <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.receipt}</TableHead>
-                          <TableHead className="text-center">{t.actions}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {loading ? (
-                          Array.from({ length: 5 }).map((_, idx) => (
-                            <TableRow key={idx} className="border-border">
-                              <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
-                              <TableCell><Skeleton className="h-4 w-[180px]" /></TableCell>
-                              <TableCell><Skeleton className="h-6 w-[80px] rounded-full" /></TableCell>
-                              <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-                              <TableCell><Skeleton className="h-[100px] w-[100px] rounded-lg" /></TableCell>
-                              <TableCell><Skeleton className="h-10 w-[140px] mx-auto" /></TableCell>
+            {/* Users tab — Pending Requests + All Users */}
+            <TabsContent value="users">
+              <Tabs defaultValue="pending-requests" className="w-full" onValueChange={(val) => { if (val === 'all-users' && !usersFetched) fetchAllUsers(); }}>
+                <div className="flex items-center justify-between mb-4">
+                  <TabsList className="bg-muted border border-border p-1">
+                    <TabsTrigger value="pending-requests" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded px-5 py-1.5 flex items-center gap-2">
+                      {t.pendingApprovals}
+                      {pendingRequests.length > 0 && (
+                        <span className="bg-destructive text-destructive-foreground text-xs font-bold rounded-full px-1.5 py-0.5 leading-none">
+                          {pendingRequests.length}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger value="all-users" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded px-5 py-1.5">
+                      {t.allUsers}
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <TabsContent value="pending-requests">
+                  <Card className="bg-card shadow-lg border-border">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        {t.pendingApprovals}
+                        {pendingRequests.length > 0 && (
+                          <Badge className="bg-destructive/10 text-destructive border-destructive/20">
+                            {pendingRequests.length}
+                          </Badge>
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="rounded-xl border border-border overflow-hidden bg-background">
+                        <Table dir={isRTL ? 'rtl' : 'ltr'}>
+                          <TableHeader className="bg-muted/50">
+                            <TableRow className="border-border">
+                              <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.user}</TableHead>
+                              <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.email}</TableHead>
+                              <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.requestedTier}</TableHead>
+                              <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.requestDate}</TableHead>
+                              <TableHead className={isRTL ? 'text-right' : 'text-left'}>{t.receipt}</TableHead>
+                              <TableHead className="text-center">{t.actions}</TableHead>
                             </TableRow>
-                          ))
-                        ) : errorMsg ? (
-                          <TableRow>
-                            <TableCell colSpan={6} className="text-center py-12">
-                              <div className="flex flex-col items-center gap-3 text-destructive">
-                                <AlertTriangle className="w-8 h-8 opacity-80" />
-                                <p className="font-medium">{errorMsg}</p>
-                                <Button variant="outline" size="sm" onClick={fetchPendingRequests}>
-                                  <RefreshCw className="w-4 h-4 mr-2" /> {t.retry}
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ) : pendingRequests.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={6} className="text-center py-16 text-muted-foreground">
-                              <div className="flex flex-col items-center gap-3">
-                                <CheckCircle className="w-12 h-12 text-muted-foreground/30" />
-                                <p className="text-lg font-medium">{t.noPendingRequests}</p>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          pendingRequests.map((req) => {
-                            const user = req.expand?.user_id || {};
-                            const thumbUrl = req.receipt_image?.startsWith('http')
-                              ? req.receipt_image
-                              : (req.receipt_image ? pb.files.getUrl(req, req.receipt_image, { thumb: '100x100' }) : null);
-                            return (
-                              <TableRow key={req.id} className="border-border hover:bg-muted/30 transition-colors">
-                                <TableCell className="font-medium text-foreground">{user.name || 'Unknown'}</TableCell>
-                                <TableCell className="text-muted-foreground">{user.email || 'No email'}</TableCell>
-                                <TableCell>
-                                  <Badge variant="outline" className={`uppercase font-bold tracking-wider ${getTierBadgeStyle(req.tier)}`}>
-                                    {formatTierName(req.tier)}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-sm font-medium">{new Date(req.created).toLocaleDateString()}</TableCell>
-                                <TableCell>
-                                  {thumbUrl ? (
-                                    <div
-                                      className="w-[80px] h-[80px] rounded-lg bg-secondary overflow-hidden cursor-pointer border border-border hover:opacity-80 transition-all hover:shadow-md hover:ring-2 ring-primary"
-                                      onClick={() => openReceiptModal(req)}
-                                    >
-                                      <img src={thumbUrl} alt={t.receipt} className="w-full h-full object-cover"
-                                        onError={(e) => { e.target.style.display='none'; e.target.nextElementSibling.style.display='flex'; }}
-                                      />
-                                      <div className="hidden flex-col items-center justify-center w-full h-full text-muted-foreground bg-muted">
-                                        <ImageIcon className="w-6 h-6 opacity-50" />
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <div className="w-[80px] h-[80px] rounded-lg bg-muted flex items-center justify-center border border-border/50 text-muted-foreground">
-                                      <AlertTriangle className="w-6 h-6 opacity-30" />
-                                    </div>
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex justify-center items-center gap-2">
-                                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white shadow-sm" onClick={() => handleApproveClick(req)} disabled={actionLoading}>
-                                      <CheckCircle className="w-4 h-4 mr-2" />{t.approve}
-                                    </Button>
-                                    <Button size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleRejectClick(req)} disabled={actionLoading}>
-                                      <XCircle className="w-4 h-4 mr-2" />{t.reject}
+                          </TableHeader>
+                          <TableBody>
+                            {loading ? (
+                              Array.from({ length: 5 }).map((_, idx) => (
+                                <TableRow key={idx} className="border-border">
+                                  <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
+                                  <TableCell><Skeleton className="h-4 w-[180px]" /></TableCell>
+                                  <TableCell><Skeleton className="h-6 w-[80px] rounded-full" /></TableCell>
+                                  <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                                  <TableCell><Skeleton className="h-[100px] w-[100px] rounded-lg" /></TableCell>
+                                  <TableCell><Skeleton className="h-10 w-[140px] mx-auto" /></TableCell>
+                                </TableRow>
+                              ))
+                            ) : errorMsg ? (
+                              <TableRow>
+                                <TableCell colSpan={6} className="text-center py-12">
+                                  <div className="flex flex-col items-center gap-3 text-destructive">
+                                    <AlertTriangle className="w-8 h-8 opacity-80" />
+                                    <p className="font-medium">{errorMsg}</p>
+                                    <Button variant="outline" size="sm" onClick={fetchPendingRequests}>
+                                      <RefreshCw className="w-4 h-4 mr-2" /> {t.retry}
                                     </Button>
                                   </div>
                                 </TableCell>
                               </TableRow>
-                            );
-                          })
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
+                            ) : pendingRequests.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={6} className="text-center py-16 text-muted-foreground">
+                                  <div className="flex flex-col items-center gap-3">
+                                    <CheckCircle className="w-12 h-12 text-muted-foreground/30" />
+                                    <p className="text-lg font-medium">{t.noPendingRequests}</p>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              pendingRequests.map((req) => {
+                                const user = req.expand?.user_id || {};
+                                const thumbUrl = req.receipt_image?.startsWith('http')
+                                  ? req.receipt_image
+                                  : (req.receipt_image ? pb.files.getUrl(req, req.receipt_image, { thumb: '100x100' }) : null);
+                                return (
+                                  <TableRow key={req.id} className="border-border hover:bg-muted/30 transition-colors">
+                                    <TableCell className="font-medium text-foreground">{user.name || 'Unknown'}</TableCell>
+                                    <TableCell className="text-muted-foreground">{user.email || 'No email'}</TableCell>
+                                    <TableCell>
+                                      <Badge variant="outline" className={`uppercase font-bold tracking-wider ${getTierBadgeStyle(req.tier)}`}>
+                                        {formatTierName(req.tier)}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-sm font-medium">{new Date(req.created).toLocaleDateString()}</TableCell>
+                                    <TableCell>
+                                      {thumbUrl ? (
+                                        <div
+                                          className="w-[80px] h-[80px] rounded-lg bg-secondary overflow-hidden cursor-pointer border border-border hover:opacity-80 transition-all hover:shadow-md hover:ring-2 ring-primary"
+                                          onClick={() => openReceiptModal(req)}
+                                        >
+                                          <img src={thumbUrl} alt={t.receipt} className="w-full h-full object-cover"
+                                            onError={(e) => { e.target.style.display='none'; e.target.nextElementSibling.style.display='flex'; }}
+                                          />
+                                          <div className="hidden flex-col items-center justify-center w-full h-full text-muted-foreground bg-muted">
+                                            <ImageIcon className="w-6 h-6 opacity-50" />
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div className="w-[80px] h-[80px] rounded-lg bg-muted flex items-center justify-center border border-border/50 text-muted-foreground">
+                                          <AlertTriangle className="w-6 h-6 opacity-30" />
+                                        </div>
+                                      )}
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex justify-center items-center gap-2">
+                                        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white shadow-sm" onClick={() => handleApproveClick(req)} disabled={actionLoading}>
+                                          <CheckCircle className="w-4 h-4 mr-2" />{t.approve}
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleRejectClick(req)} disabled={actionLoading}>
+                                          <XCircle className="w-4 h-4 mr-2" />{t.reject}
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="all-users">
+                  <Card className="bg-card shadow-lg border-border">
+                    <CardHeader>
+                      <CardTitle>{t.allUsers} {!usersLoading && allUsers.length > 0 && <span className="text-muted-foreground font-normal text-sm">({allUsers.length})</span>}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="rounded-xl border border-border overflow-hidden bg-background">
+                        <Table dir={isRTL ? 'rtl' : 'ltr'}>
+                          <TableHeader className="bg-muted/50">
+                            <TableRow className="border-border">
+                              <TableHead className="py-4">{t.user}</TableHead>
+                              <TableHead className="py-4">{t.email}</TableHead>
+                              <TableHead className="py-4">{t.tierLabel}</TableHead>
+                              <TableHead className="py-4">{t.subscriptionStatus}</TableHead>
+                              <TableHead className="py-4">{t.joined}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {usersLoading ? (
+                              Array.from({ length: 6 }).map((_, i) => (
+                                <TableRow key={i} className="border-border">
+                                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                  <TableCell><Skeleton className="h-4 w-44" /></TableCell>
+                                  <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                                  <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                </TableRow>
+                              ))
+                            ) : allUsers.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={5} className="text-center py-16 text-muted-foreground">
+                                  <p className="font-medium">{t.noUsers}</p>
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              allUsers.map(user => (
+                                <TableRow key={user.id} className="border-border hover:bg-muted/30 transition-colors">
+                                  <TableCell className="py-3">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                        <span className="text-xs font-bold text-primary">
+                                          {user.name?.charAt(0)?.toUpperCase() || '?'}
+                                        </span>
+                                      </div>
+                                      <span className="font-medium text-sm text-foreground">{user.name || '—'}</span>
+                                      {user.is_admin && <Badge className="text-xs bg-primary/10 text-primary border-primary/20">Admin</Badge>}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="py-3 text-sm text-muted-foreground">{user.email}</TableCell>
+                                  <TableCell className="py-3">
+                                    <Badge variant="outline" className={`text-xs font-semibold capitalize ${getTierBadgeStyle(user.subscription_tier)}`}>
+                                      {formatTierName(user.subscription_tier) || 'Observer'}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="py-3">
+                                    {user.subscription_status === 'active'
+                                      ? <Badge className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Active</Badge>
+                                      : <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                                    }
+                                  </TableCell>
+                                  <TableCell className="py-3 text-sm text-muted-foreground">
+                                    {new Date(user.created).toLocaleDateString()}
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
             {/* Listings tab */}
@@ -677,17 +825,6 @@ const AdminDashboard = () => {
                   </Card>
                 </TabsContent>
               </Tabs>
-            </TabsContent>
-
-            <TabsContent value="users">
-              <Card className="bg-card shadow-lg border-border">
-                <CardHeader><CardTitle>{t.allUsers}</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="text-center py-16 text-muted-foreground border border-border border-dashed rounded-xl bg-background">
-                    Coming soon.
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="import">

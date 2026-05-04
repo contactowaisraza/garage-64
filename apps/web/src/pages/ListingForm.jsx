@@ -19,9 +19,9 @@ import { BadgeInfo as InfoIcon, Upload } from 'lucide-react';
 
 const TIER_LIMITS = {
   observer: 3,
-  hobbyist: 10,
-  collector: 50,
-  dealer: 9999
+  hobbyist: 3,
+  collector: 7,
+  dealer: 21
 };
 
 const ListingForm = () => {
