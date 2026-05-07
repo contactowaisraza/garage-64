@@ -1,6 +1,9 @@
 import React from 'react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const ConditionBadge = ({ condition, className = '' }) => {
+  const { td } = useLanguage();
+
   const getColor = () => {
     switch (condition) {
       case 'Mint': return 'bg-emerald-500/10 text-emerald-500';
@@ -15,7 +18,7 @@ const ConditionBadge = ({ condition, className = '' }) => {
 
   return (
     <div className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold premium-border ${getColor()} ${className}`}>
-      <span className="bilingual-body">{condition}</span>
+      <span>{td(condition)}</span>
     </div>
   );
 };

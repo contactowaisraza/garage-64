@@ -7,6 +7,7 @@ import pb from '@/lib/pocketbaseClient';
 import { toast } from 'sonner';
 import enTranslations from '@/locales/en.json';
 import arTranslations from '@/locales/ar.json';
+import { Check, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import PaymentModal from '@/components/PaymentModal.jsx';
 
@@ -22,6 +23,12 @@ const MembershipTiersSection = () => {
   const t = currentLang === 'ar' ? arTranslations : enTranslations;
 
   const tierKeys = ['observer', 'hobbyist', 'collector', 'dealer'];
+
+  const FEATURE_ACCESS = {
+    messaging:      ['hobbyist', 'collector', 'dealer'],
+    depositRequest: ['collector', 'dealer'],
+    priorityRequest:['dealer'],
+  };
 
   const tierStyles = {
     observer: { bg: 'bg-[#4a4a4a]', border: 'border-white/10', text: 'text-white' },
@@ -118,12 +125,24 @@ const MembershipTiersSection = () => {
 
                   <div className="flex-grow mb-8">
                     <ul className="space-y-4">
-                      {[tier.adLimit, tier.listingType, tier.messaging].map((feature, idx) => (
+                      {[tier.adLimit, tier.listingType].map((feature, idx) => (
                         <li key={idx} className={`flex items-start gap-3 text-sm font-medium leading-tight ${style.text}`}>
-                          <span className="shrink-0 mt-0.5 opacity-80">✓</span>
+                          <Check className="shrink-0 mt-0.5 w-4 h-4 opacity-80" />
                           <span>{feature}</span>
                         </li>
                       ))}
+                      {(['messaging', 'depositRequest', 'priorityRequest']).map((featureKey) => {
+                        const hasAccess = FEATURE_ACCESS[featureKey].includes(key);
+                        return (
+                          <li key={featureKey} className={`flex items-start gap-3 text-sm font-medium leading-tight ${style.text}`}>
+                            {hasAccess
+                              ? <Check className="shrink-0 mt-0.5 w-4 h-4 opacity-80" />
+                              : <X className="shrink-0 mt-0.5 w-4 h-4 opacity-50" />
+                            }
+                            <span className={!hasAccess ? 'opacity-50' : ''}>{tier[featureKey]}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
 

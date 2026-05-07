@@ -21,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { AlertTriangle, RefreshCw, CheckCircle, XCircle, Loader2, Image as ImageIcon, Upload, LayoutList, Eye } from 'lucide-react';
-import { formatTierName } from '@/utils/subscriptionUtils';
+
 
 const translations = {
   en: {
@@ -78,6 +78,19 @@ const translations = {
     areYouSureApproveListing: 'This listing will be published and visible to all users.',
     confirmListingRejection: 'Reject Listing',
     rejectionReasonRequired: 'Rejection reason (shown to the user)',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    pending: 'Pending',
+    condition: 'Condition',
+    price: 'Price',
+    postedOn: 'Posted On',
+    description: 'Description',
+    close: 'Close',
+    refresh: 'Refresh',
+    couldNotLoad: 'Could not load listings',
+    adminBadge: 'Admin',
+    activeStatus: 'Active',
+    inactiveStatus: 'Inactive',
   },
   ar: {
     pendingApprovals: 'الطلبات المعلقة',
@@ -133,6 +146,19 @@ const translations = {
     areYouSureApproveListing: 'سيتم نشر هذا الإعلان وسيكون مرئيًا لجميع المستخدمين.',
     confirmListingRejection: 'رفض الإعلان',
     rejectionReasonRequired: 'سبب الرفض (سيظهر للمستخدم)',
+    approved: 'موافق عليه',
+    rejected: 'مرفوض',
+    pending: 'قيد الانتظار',
+    condition: 'الحالة',
+    price: 'السعر',
+    postedOn: 'تاريخ النشر',
+    description: 'الوصف',
+    close: 'إغلاق',
+    refresh: 'تحديث',
+    couldNotLoad: 'تعذر تحميل الإعلانات',
+    adminBadge: 'مسؤول',
+    activeStatus: 'نشط',
+    inactiveStatus: 'غير نشط',
   }
 };
 
@@ -146,14 +172,14 @@ const getTierBadgeStyle = (tier) => {
   }
 };
 
-const getStatusBadge = (status) => {
+const getStatusBadge = (status, t) => {
   switch (status) {
     case 'Approved':
-      return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Approved</Badge>;
+      return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">{t?.approved ?? 'Approved'}</Badge>;
     case 'Rejected':
-      return <Badge className="bg-destructive/10 text-destructive border-destructive/20">Rejected</Badge>;
+      return <Badge className="bg-destructive/10 text-destructive border-destructive/20">{t?.rejected ?? 'Rejected'}</Badge>;
     default:
-      return <Badge variant="secondary">Pending</Badge>;
+      return <Badge variant="secondary">{t?.pending ?? 'Pending'}</Badge>;
   }
 };
 
@@ -161,7 +187,7 @@ const TIER_PRIORITY = { dealer: 0, collector: 1, hobbyist: 2, observer: 3 };
 const tierRank = (tier) => TIER_PRIORITY[tier?.toLowerCase()] ?? 4;
 
 const AdminDashboard = () => {
-  const { language, isRTL } = useLanguage();
+  const { language, isRTL, td } = useLanguage();
   const { currentUser } = useAuth();
   const t = translations[language === 'ar' ? 'ar' : 'en'];
 
@@ -391,13 +417,13 @@ const AdminDashboard = () => {
         <div className="flex items-start gap-3 p-4 bg-destructive/5 border-b border-destructive/20 text-sm text-destructive">
           <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <div className="space-y-1">
-            <p className="font-medium">Could not load listings: {listingsError}</p>
+            <p className="font-medium">{t.couldNotLoad}: {listingsError}</p>
             <p className="text-muted-foreground text-xs">
               Make sure the <strong>listings</strong> collection List rule in PocketBase allows the admin collection:<br />
               <code className="bg-muted px-1 py-0.5 rounded text-foreground">@request.auth.collectionName = "admin" || user_id = @request.auth.id</code>
             </p>
             <Button variant="outline" size="sm" onClick={fetchListings} className="mt-2 h-7 text-xs">
-              <RefreshCw className="w-3 h-3 mr-1" /> Retry
+              <RefreshCw className="w-3 h-3 mr-1" /> {t.retry}
             </Button>
           </div>
         </div>
@@ -462,17 +488,17 @@ const AdminDashboard = () => {
                   </TableCell>
                   <TableCell className="py-3">
                     <Badge variant="outline" className={`text-xs font-semibold capitalize ${getTierBadgeStyle(user?.subscription_tier)}`}>
-                      {formatTierName(user?.subscription_tier) || 'Observer'}
+                      {td(user?.subscription_tier) || td('Observer')}
                     </Badge>
                   </TableCell>
-                  <TableCell className="py-3 text-sm text-muted-foreground">{listing.category}</TableCell>
+                  <TableCell className="py-3 text-sm text-muted-foreground">{td(listing.category)}</TableCell>
                   <TableCell className="py-3">
                     <Badge variant="outline" className="capitalize bg-background text-xs">
-                      {listing.listingType || 'Showcase'}
+                      {td(listing.listingType || 'Showcase')}
                     </Badge>
                   </TableCell>
                   {!isPendingView && (
-                    <TableCell className="py-3">{getStatusBadge(listing.status)}</TableCell>
+                    <TableCell className="py-3">{getStatusBadge(listing.status, t)}</TableCell>
                   )}
                   <TableCell className="py-3">
                     <div className="flex justify-center items-center gap-2">
@@ -654,7 +680,7 @@ const AdminDashboard = () => {
                                     <TableCell className="text-muted-foreground">{user.email || 'No email'}</TableCell>
                                     <TableCell>
                                       <Badge variant="outline" className={`uppercase font-bold tracking-wider ${getTierBadgeStyle(req.tier)}`}>
-                                        {formatTierName(req.tier)}
+                                        {td(req.tier)}
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="text-sm font-medium">{new Date(req.created).toLocaleDateString()}</TableCell>
@@ -743,19 +769,19 @@ const AdminDashboard = () => {
                                         </span>
                                       </div>
                                       <span className="font-medium text-sm text-foreground">{user.name || '—'}</span>
-                                      {user.is_admin && <Badge className="text-xs bg-primary/10 text-primary border-primary/20">Admin</Badge>}
+                                      {user.is_admin && <Badge className="text-xs bg-primary/10 text-primary border-primary/20">{t.adminBadge}</Badge>}
                                     </div>
                                   </TableCell>
                                   <TableCell className="py-3 text-sm text-muted-foreground">{user.email}</TableCell>
                                   <TableCell className="py-3">
                                     <Badge variant="outline" className={`text-xs font-semibold capitalize ${getTierBadgeStyle(user.subscription_tier)}`}>
-                                      {formatTierName(user.subscription_tier) || 'Observer'}
+                                      {td(user.subscription_tier) || td('Observer')}
                                     </Badge>
                                   </TableCell>
                                   <TableCell className="py-3">
                                     {user.subscription_status === 'active'
-                                      ? <Badge className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Active</Badge>
-                                      : <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                                      ? <Badge className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/20">{t.activeStatus}</Badge>
+                                      : <Badge variant="secondary" className="text-xs">{t.inactiveStatus}</Badge>
                                     }
                                   </TableCell>
                                   <TableCell className="py-3 text-sm text-muted-foreground">
@@ -792,7 +818,7 @@ const AdminDashboard = () => {
                   </TabsList>
                   <Button variant="ghost" size="sm" onClick={fetchListings} disabled={listingsLoading} className="text-muted-foreground">
                     <RefreshCw className={`w-4 h-4 mr-2 ${listingsLoading ? 'animate-spin' : ''}`} />
-                    Refresh
+                    {t.refresh}
                   </Button>
                 </div>
 
@@ -1013,34 +1039,34 @@ const AdminDashboard = () => {
                 {/* Details grid */}
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="space-y-0.5">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Posted By</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t.postedBy}</p>
                     <p className="font-medium">{poster?.name || poster?.email || '—'}</p>
                     {poster?.email && poster?.name && <p className="text-xs text-muted-foreground">{poster.email}</p>}
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Status</p>
-                    <div>{getStatusBadge(viewingListing.status)}</div>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t.status}</p>
+                    <div>{getStatusBadge(viewingListing.status, t)}</div>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Category</p>
-                    <p className="font-medium">{viewingListing.category || '—'}</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t.category}</p>
+                    <p className="font-medium">{td(viewingListing.category) || '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Type</p>
-                    <Badge variant="outline" className="capitalize text-xs">{viewingListing.listingType || 'Showcase'}</Badge>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t.type}</p>
+                    <Badge variant="outline" className="capitalize text-xs">{td(viewingListing.listingType || 'Showcase')}</Badge>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Condition</p>
-                    <p className="font-medium">{viewingListing.condition || '—'}</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t.condition}</p>
+                    <p className="font-medium">{td(viewingListing.condition) || '—'}</p>
                   </div>
                   {viewingListing.listingType === 'sell' && (
                     <div className="space-y-0.5">
-                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Price</p>
+                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t.price}</p>
                       <p className="font-medium">SAR {viewingListing.price || '—'}</p>
                     </div>
                   )}
                   <div className="space-y-0.5">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Posted On</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t.postedOn}</p>
                     <p className="font-medium">{new Date(viewingListing.created).toLocaleDateString()}</p>
                   </div>
                 </div>
@@ -1048,7 +1074,7 @@ const AdminDashboard = () => {
                 {/* Description */}
                 {viewingListing.description && (
                   <div className="space-y-1.5">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Description</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t.description}</p>
                     <p className="text-sm leading-relaxed whitespace-pre-wrap border border-border rounded-lg p-3 bg-muted/30">{viewingListing.description}</p>
                   </div>
                 )}
@@ -1056,7 +1082,7 @@ const AdminDashboard = () => {
                 {/* Rejection reason */}
                 {viewingListing.rejection_reason && (
                   <div className="space-y-1.5">
-                    <p className="text-xs text-destructive font-medium uppercase tracking-wide">Rejection Reason</p>
+                    <p className="text-xs text-destructive font-medium uppercase tracking-wide">{t.rejectionReason}</p>
                     <p className="text-sm text-destructive leading-relaxed border border-destructive/20 rounded-lg p-3 bg-destructive/5">{viewingListing.rejection_reason}</p>
                   </div>
                 )}
@@ -1085,7 +1111,7 @@ const AdminDashboard = () => {
                       </Button>
                     </>
                   )}
-                  <Button variant="outline" onClick={() => setViewingListing(null)}>Close</Button>
+                  <Button variant="outline" onClick={() => setViewingListing(null)}>{t.close}</Button>
                 </DialogFooter>
               </>
             );

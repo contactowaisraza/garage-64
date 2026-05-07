@@ -7,10 +7,10 @@ import pb from '@/lib/pocketbaseClient';
 import CategoryBadge from './CategoryBadge';
 import ConditionBadge from './ConditionBadge';
 import CarsPriceBadge from './CarsPriceBadge';
-import { Image as ImageIcon } from 'lucide-react';
+import { Heart, Image as ImageIcon } from 'lucide-react';
 
-const ListingCard = ({ listing }) => {
-  const { isRTL } = useLanguage();
+const ListingCard = ({ listing, isLiked = false, onToggleLike, isOwnListing = false, displayTitle, displayDescription }) => {
+  const { isRTL, td, t } = useLanguage();
   const { currentUser } = useAuth();
 
   const imageUrl = listing.images && listing.images.length > 0
@@ -18,12 +18,37 @@ const ListingCard = ({ listing }) => {
     : null;
 
   const userTier = currentUser?.tier || currentUser?.subscription_tier;
+  const isSale = listing.listingType === 'sell' || listing.listing_type === 'sell';
+
+  const handleLike = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!currentUser || !onToggleLike) return;
+    onToggleLike(listing.id);
+  };
 
   return (
     <Link to={`/listing/${listing.id}`} className="group block h-full">
       <div className="bg-[#0d0d0d] rounded-xl overflow-hidden border border-white/5 hover:border-white/12 transition-all duration-300 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5 flex flex-col h-full relative">
 
-        <CarsPriceBadge price={listing.price} tier={userTier} />
+        {isSale && <CarsPriceBadge price={listing.price} tier={userTier} />}
+
+        {/* Own listing badge / Like button */}
+        {isOwnListing ? (
+          <div className="absolute top-2.5 right-2.5 z-20 px-2 py-0.5 rounded-full bg-primary/80 backdrop-blur-sm text-[10px] font-semibold text-white tracking-wide">
+            {t('listings.yourListing') || 'Yours'}
+          </div>
+        ) : currentUser && (
+          <button
+            onClick={handleLike}
+            className="absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110 hover:bg-black/70"
+            aria-label={isLiked ? 'Unlike' : 'Like'}
+          >
+            <Heart
+              className={`w-4 h-4 transition-colors duration-200 ${isLiked ? 'fill-red-500 text-red-500' : 'text-white/70'}`}
+            />
+          </button>
+        )}
 
         {/* Image */}
         <div className="aspect-[4/3] relative overflow-hidden bg-[#111]">
@@ -53,11 +78,11 @@ const ListingCard = ({ listing }) => {
         {/* Info */}
         <div className="p-4 flex flex-col flex-1">
           <h3 className="text-sm font-semibold tracking-tight text-foreground line-clamp-1 group-hover:text-primary transition-colors duration-200" dir="auto">
-            {listing.title}
+            {displayTitle || listing.title}
           </h3>
 
           <p className="mt-1.5 text-xs text-muted-foreground/70 line-clamp-2 flex-1 leading-relaxed" dir="auto">
-            {listing.description || (isRTL ? 'لا يوجد وصف' : 'No description provided.')}
+            {displayDescription || listing.description || t('listings.noDescription')}
           </p>
 
           <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
@@ -73,9 +98,7 @@ const ListingCard = ({ listing }) => {
                 ? 'text-primary/80 bg-primary/8'
                 : 'text-muted-foreground/60 bg-white/4'
             }`}>
-              {listing.listingType === 'sell'
-                ? (isRTL ? 'للبيع' : 'For Sale')
-                : (isRTL ? 'للعرض' : 'Showcase')}
+              {td(listing.listingType === 'sell' ? 'sell' : 'showcase')}
             </span>
           </div>
         </div>

@@ -26,7 +26,7 @@ const tierOptions = [
 ];
 
 const RegisterPage = () => {
-  const { isRTL } = useLanguage();
+  const { isRTL, td } = useLanguage();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -154,7 +154,7 @@ const RegisterPage = () => {
                     <SelectContent>
                       {tierOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                          {td(option.value)}
                         </SelectItem>
                       ))}
                     </SelectContent>

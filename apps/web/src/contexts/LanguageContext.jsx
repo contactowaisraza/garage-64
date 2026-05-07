@@ -28,11 +28,19 @@ export const LanguageProvider = ({ children }) => {
     return value || path;
   };
 
+  // Translate any raw database value (status, category, tier, condition, etc.)
+  // Falls back to the original value if no mapping exists.
+  const td = (value) => {
+    if (value === null || value === undefined) return value;
+    return translations[language]?.values?.[value] ?? value;
+  };
+
   const value = {
     language,
     setLanguage,
     toggleLanguage,
     t,
+    td,
     isRTL: language === 'ar'
   };
 

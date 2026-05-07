@@ -25,6 +25,7 @@ import DiecastCategoryPage from '@/pages/DiecastCategoryPage.jsx';
 import DiecastBrandListingsPage from '@/pages/DiecastBrandListingsPage.jsx';
 import MembershipsPage from '@/pages/MembershipsPage.jsx';
 import PendingApprovalPage from '@/pages/PendingApprovalPage.jsx';
+import FavoritesPage from '@/pages/FavoritesPage.jsx';
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
               <Route path="/messages" element={<ProtectedSubscriptionRoute><MessagesPage /></ProtectedSubscriptionRoute>} />
               <Route path="/messages/:conversationId" element={<ProtectedSubscriptionRoute><ChatDetailPage /></ProtectedSubscriptionRoute>} />
               <Route path="/payment-history" element={<ProtectedSubscriptionRoute><PaymentHistoryPage /></ProtectedSubscriptionRoute>} />
+              <Route path="/favorites" element={<ProtectedSubscriptionRoute><FavoritesPage /></ProtectedSubscriptionRoute>} />
               
               {/* Admin Routes */}
               <Route path="/admin-dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />

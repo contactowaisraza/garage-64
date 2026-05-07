@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import pb from '@/lib/pocketbaseClient';
-import { LogOut, Menu, MessageSquare, X, ShieldAlert } from 'lucide-react';
+import { LogOut, Menu, MessageSquare, Heart, X, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Header = () => {
@@ -76,12 +76,12 @@ const Header = () => {
       <Link to="/" onClick={() => setMobileMenuOpen(false)} className={`bilingual-heading uppercase font-medium premium-transition ${mobile ? 'text-xl py-2' : 'text-xs'} ${isActive('/') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`}>
         {t('nav.home')}
       </Link>
-      <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className={`bilingual-heading uppercase font-medium premium-transition ${mobile ? 'text-xl py-2' : 'text-xs'} ${isActive('/browse') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`}>
+      {/* <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className={`bilingual-heading uppercase font-medium premium-transition ${mobile ? 'text-xl py-2' : 'text-xs'} ${isActive('/browse') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`}>
         {t('nav.browse')}
       </Link>
       <Link to="/bazar" onClick={() => setMobileMenuOpen(false)} className={`bilingual-heading uppercase font-medium premium-transition ${mobile ? 'text-xl py-2' : 'text-xs'} ${isActive('/bazaar') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`}>
         {t('nav.bazaar')}
-      </Link>
+      </Link> */}
 
       {isAuthenticated && !isAdmin && (
         <>
@@ -90,6 +90,9 @@ const Header = () => {
           </Link>
           <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className={`bilingual-heading uppercase font-medium premium-transition ${mobile ? 'text-xl py-2' : 'text-xs'} ${isActive('/profile') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`}>
             {t('nav.profile')}
+          </Link>
+          <Link to="/messages" onClick={() => setMobileMenuOpen(false)} className={`bilingual-heading uppercase font-medium premium-transition ${mobile ? 'text-xl py-2' : 'text-xs'} ${isActive('/messages') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`}>
+            {t('nav.messages')}
           </Link>
         </>
       )}
@@ -136,6 +139,12 @@ const Header = () => {
                 </Link>
               )}
 
+              {isAuthenticated && !isAdmin && (
+                <Link to="/favorites" className={`p-1.5 premium-transition ${isActive('/favorites') ? 'text-[#ff8c00]' : 'text-white/80 hover:text-white'}`} title={t('nav.favorites')}>
+                  <Heart className="w-5 h-5" />
+                </Link>
+              )}
+
               <button onClick={toggleLanguage} className="text-xs font-bold text-white/80 hover:text-white uppercase transition-colors">
                 {language === 'en' ? 'عربي' : 'EN'}
               </button>
@@ -172,6 +181,11 @@ const Header = () => {
                     </span>
                   )}
                 </button>
+              </Link>
+            )}
+            {isAuthenticated && !isAdmin && (
+              <Link to="/favorites" className={`p-1.5 ${isActive('/favorites') ? 'text-[#ff8c00]' : 'text-white'}`}>
+                <Heart className="w-5 h-5" />
               </Link>
             )}
             <button 

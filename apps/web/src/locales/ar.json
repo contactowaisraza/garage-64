@@ -6,7 +6,9 @@
     "description": "مثالي لعشاق السيارات",
     "adLimit": "حد 3 إعلانات",
     "listingType": "عرض فقط",
-    "messaging": "بدون رسائل",
+    "messaging": "الرسائل مفعلة",
+    "depositRequest": "طلب إيداع",
+    "priorityRequest": "طلب أولوية",
     "icon": "👁️",
     "badge": ""
   },
@@ -17,6 +19,8 @@
     "adLimit": "حد 3 إعلانات",
     "listingType": "بيع أو عرض",
     "messaging": "الرسائل مفعلة",
+    "depositRequest": "طلب إيداع",
+    "priorityRequest": "طلب أولوية",
     "icon": "🔧",
     "badge": ""
   },
@@ -27,6 +31,8 @@
     "adLimit": "حد 7 إعلانات",
     "listingType": "بيع أو عرض",
     "messaging": "الرسائل مفعلة",
+    "depositRequest": "طلب إيداع",
+    "priorityRequest": "طلب أولوية",
     "icon": "🛒",
     "badge": ""
   },
@@ -37,6 +43,8 @@
     "adLimit": "حد 21 إعلان",
     "listingType": "بيع أو عرض",
     "messaging": "الرسائل مفعلة",
+    "depositRequest": "طلب إيداع",
+    "priorityRequest": "طلب أولوية",
     "icon": "⭐",
     "badge": "موافقة ذات أولوية"
   },
@@ -56,7 +64,9 @@
         "description": "مجاناً - عرض فقط، حد 3 إعلانات",
         "adLimit": "حد 3 إعلانات",
         "listingType": "عرض فقط",
-        "messaging": "بدون رسائل"
+        "messaging": "الرسائل مفعلة",
+        "depositRequest": "طلب إيداع",
+        "priorityRequest": "طلب أولوية"
       },
       "hobbyist": {
         "name": "هاوي",
@@ -64,7 +74,9 @@
         "description": "1,000 دينار - بيع أو عرض، حد 3 إعلانات",
         "adLimit": "حد 3 إعلانات",
         "listingType": "بيع أو عرض",
-        "messaging": "الرسائل مفعلة"
+        "messaging": "الرسائل مفعلة",
+        "depositRequest": "طلب إيداع",
+        "priorityRequest": "طلب أولوية"
       },
       "collector": {
         "name": "جامع",
@@ -72,7 +84,9 @@
         "description": "7,000 دينار - بيع أو عرض، حد 7 إعلانات",
         "adLimit": "حد 7 إعلانات",
         "listingType": "بيع أو عرض",
-        "messaging": "الرسائل مفعلة"
+        "messaging": "الرسائل مفعلة",
+        "depositRequest": "طلب إيداع",
+        "priorityRequest": "طلب أولوية"
       },
       "dealer": {
         "name": "تاجر",
@@ -80,7 +94,9 @@
         "description": "15,000 دينار - بيع أو عرض، حد 21 إعلان",
         "adLimit": "حد 21 إعلان",
         "listingType": "بيع أو عرض",
-        "messaging": "الرسائل مفعلة"
+        "messaging": "الرسائل مفعلة",
+        "depositRequest": "طلب إيداع",
+        "priorityRequest": "طلب أولوية"
       }
     }
   }

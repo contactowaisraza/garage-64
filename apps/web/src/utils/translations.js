@@ -11,7 +11,8 @@ export const translations = {
       browse: 'تصفح المعرض',
       bazaar: 'البازار',
       myListings: 'إعلاناتي',
-      messages: 'الرسائل'
+      messages: 'الرسائل',
+      favorites: 'المفضلة'
     },
     brand: {
       name: 'جراج ٦٤',
@@ -137,6 +138,11 @@ export const translations = {
       createListing: 'إنشاء إعلان جديد',
       editListing: 'تعديل وإعادة تقديم الإعلان',
       contactSeller: 'تواصل مع البائع',
+      seller: 'البائع',
+      date: 'تاريخ النشر',
+      yourListing: 'إعلانك',
+      noDescription: 'لا يوجد وصف',
+      member: 'عضو',
       title: 'عنوان الإعلان',
       titlePlaceholder: 'مثال: هوت ويلز فيراري إنزو - أحمر سبيكترافليم',
       titleHelper: 'أعط إعلانك اسمًا واضحًا ووصفيًا.',
@@ -156,6 +162,7 @@ export const translations = {
       forSale: 'للبيع',
       forSaleDescription: 'أدرجه بسعر حتى يتمكن المشترون من التواصل معك.',
       observerUpgradeHint: 'مستوى المراقب يمكنه عرض العناصر فقط. قم بترقية خطتك لتمكين البيع.',
+      observerContactHint: 'ترقية الحساب لعرض الأسعار والتواصل مع البائعين.',
       price: 'السعر المطلوب',
       pricePlaceholder: '0.00',
       priceHelper: 'أدخل السعر بالريال السعودي. سيتواصل معك المشترون للتفاوض.',
@@ -167,6 +174,11 @@ export const translations = {
       resubmit: 'إعادة الإرسال',
       resubmitSuccess: 'تم إعادة إرسال الإعلان للمراجعة',
       adLimitReached: 'لقد وصلت إلى الحد المسموح ({limit} إعلان). يرجى ترقية مستواك لنشر المزيد.',
+      titleMinError: 'العنوان يجب أن يكون 10 أحرف على الأقل.',
+      titleMaxError: 'العنوان يجب أن لا يتجاوز 60 حرفاً.',
+      descriptionRequired: 'الوصف مطلوب.',
+      descriptionMinError: 'الوصف يجب أن يكون 30 حرفاً على الأقل.',
+      descriptionMaxError: 'الوصف يجب أن لا يتجاوز 300 حرف.',
       submit: 'إرسال للمراجعة',
       submitting: 'جارٍ الإرسال…',
       successCreated: 'تم إنشاء الإعلان بنجاح',
@@ -200,7 +212,65 @@ export const translations = {
       clear: 'مسح',
       close: 'إغلاق',
       error: 'خطأ',
-      success: 'نجاح'
+      success: 'نجاح',
+      view: 'عرض',
+      adsUsed: 'إعلان مستخدم',
+      createFirstListing: 'أنشئ أول إعلان لك للبدء',
+      noResults: 'لا توجد نتائج',
+      tryDifferentSearch: 'جرّب كلمة بحث مختلفة'
+    },
+    values: {
+      // listing status
+      'Approved': 'موافق عليه',
+      'Pending': 'قيد الانتظار',
+      'Rejected': 'مرفوض',
+      // listing type
+      'sell': 'للبيع',
+      'Sell': 'للبيع',
+      'showcase': 'للعرض',
+      'Showcase': 'للعرض',
+      // condition
+      'Mint': 'ممتاز',
+      'Near Mint': 'شبه ممتاز',
+      'Excellent': 'ممتاز جداً',
+      'Good': 'جيد',
+      'Fair': 'مقبول',
+      'Poor': 'ضعيف',
+      // categories
+      'Hot Wheels': 'هوت ويلز',
+      'Matchbox': 'ماتشبوكس',
+      'RC Cars': 'سيارات التحكم',
+      'DIY Garages': 'مرائب DIY',
+      'Planes': 'طائرات',
+      'Miniatures': 'مجسمات',
+      'Bazaar': 'بازار',
+      'Others': 'أخرى',
+      // tiers (both cases)
+      'observer': 'مراقب',
+      'Observer': 'مراقب',
+      'hobbyist': 'هاوي',
+      'Hobbyist': 'هاوي',
+      'collector': 'جامع',
+      'Collector': 'جامع',
+      'dealer': 'تاجر',
+      'Dealer': 'تاجر',
+      // subscription status
+      'active': 'نشط',
+      'Active': 'نشط',
+      'expired': 'منتهي الصلاحية',
+      'Expired': 'منتهي الصلاحية',
+      'pending': 'قيد الانتظار',
+      // listing type labels
+      'For Sale': 'للبيع',
+      'Showcase Only': 'للعرض فقط',
+      // days / dates
+      'days': 'أيام',
+      'day': 'يوم',
+      // misc
+      'Active': 'نشط',
+      'Inactive': 'غير نشط',
+      'For Sale': 'للبيع',
+      'Showcase': 'للعرض',
     }
   },
   en: {
@@ -215,7 +285,8 @@ export const translations = {
       browse: 'Browse',
       bazaar: 'Bazaar',
       myListings: 'My Listings',
-      messages: 'Messages'
+      messages: 'Messages',
+      favorites: 'Favourites'
     },
     brand: {
       name: 'Garage64',
@@ -341,6 +412,11 @@ export const translations = {
       createListing: 'Create Listing',
       editListing: 'Edit & Resubmit Listing',
       contactSeller: 'Contact Seller',
+      seller: 'Listed by',
+      date: 'Posted',
+      yourListing: 'Yours',
+      noDescription: 'No description provided.',
+      member: 'member',
       title: 'Listing Title',
       titlePlaceholder: 'e.g. Hot Wheels Ferrari Enzo – Red Spectraflame',
       titleHelper: 'Give your listing a clear, descriptive name.',
@@ -360,6 +436,7 @@ export const translations = {
       forSale: 'For Sale',
       forSaleDescription: 'List with a price so buyers can contact you.',
       observerUpgradeHint: 'Observer tier can only showcase items. Upgrade your plan to enable selling.',
+      observerContactHint: 'Upgrade your account to view prices and contact sellers.',
       price: 'Asking Price',
       pricePlaceholder: '0.00',
       priceHelper: 'Enter the price in Saudi Riyals (SAR). Buyers will contact you to negotiate.',
@@ -371,6 +448,11 @@ export const translations = {
       resubmit: 'Resubmit',
       resubmitSuccess: 'Listing resubmitted for review',
       adLimitReached: 'Ad limit reached ({limit} ads). Please upgrade your tier to post more listings.',
+      titleMinError: 'Title must be at least 10 characters.',
+      titleMaxError: 'Title must be at most 60 characters.',
+      descriptionRequired: 'Description is required.',
+      descriptionMinError: 'Description must be at least 30 characters.',
+      descriptionMaxError: 'Description must be at most 300 characters.',
       submit: 'Submit for Review',
       submitting: 'Submitting…',
       successCreated: 'Listing created successfully',
@@ -404,7 +486,12 @@ export const translations = {
       clear: 'Clear',
       close: 'Close',
       error: 'Error',
-      success: 'Success'
+      success: 'Success',
+      view: 'View',
+      adsUsed: 'ads used',
+      createFirstListing: 'Create your first listing to get started.',
+      noResults: 'No results found',
+      tryDifferentSearch: 'Try a different search term'
     }
   }
 };

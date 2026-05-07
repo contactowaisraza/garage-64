@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useLanguage } from '@/hooks/useLanguage';
+import { LISTING_CATEGORIES, LISTING_CONDITIONS } from '@/utils/categories';
 import { useAuth } from '@/contexts/AuthContext';
 import pb from '@/lib/pocketbaseClient';
 import Header from '@/components/Header';
@@ -25,7 +26,7 @@ const TIER_LIMITS = {
 };
 
 const ListingForm = () => {
-  const { t } = useLanguage();
+  const { t, td } = useLanguage();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -51,9 +52,10 @@ const ListingForm = () => {
     condition: ''
   });
   const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
 
-  const categories = ['Hot Wheels', 'Matchbox', 'RC Cars', 'DIY Garages', 'Planes', 'Miniatures'];
-  const conditions = ['Mint', 'Near Mint', 'Excellent', 'Good', 'Fair', 'Poor'];
+  const MAX_IMAGES = 7;
+
 
   useEffect(() => {
     if (isEditMode) {
@@ -103,9 +105,17 @@ const ListingForm = () => {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files) {
-      setImages(Array.from(e.target.files));
-    }
+    if (!e.target.files) return;
+    const selected = Array.from(e.target.files).slice(0, MAX_IMAGES);
+    setImages(selected);
+    const urls = selected.map(f => URL.createObjectURL(f));
+    setImagePreviews(prev => { prev.forEach(u => URL.revokeObjectURL(u)); return urls; });
+  };
+
+  const removeImage = (index) => {
+    URL.revokeObjectURL(imagePreviews[index]);
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -113,6 +123,27 @@ const ListingForm = () => {
 
     if (!isEditMode && isLimitReached) {
       toast.error(`Ad limit reached for your tier (${adLimit} ads max).`);
+      return;
+    }
+
+    if (formData.title.trim().length < 10) {
+      toast.error(t('listings.titleMinError') || 'Title must be at least 10 characters.');
+      return;
+    }
+    if (formData.title.trim().length > 60) {
+      toast.error(t('listings.titleMaxError') || 'Title must be at most 60 characters.');
+      return;
+    }
+    if (!formData.description.trim()) {
+      toast.error(t('listings.descriptionRequired') || 'Description is required.');
+      return;
+    }
+    if (formData.description.trim().length < 30) {
+      toast.error(t('listings.descriptionMinError') || 'Description must be at least 30 characters.');
+      return;
+    }
+    if (formData.description.trim().length > 300) {
+      toast.error(t('listings.descriptionMaxError') || 'Description must be at most 300 characters.');
       return;
     }
 
@@ -208,13 +239,19 @@ const ListingForm = () => {
 
                 {/* Title */}
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-semibold">
-                    {t('listings.title')} <span className="text-destructive">*</span>
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="title" className="text-sm font-semibold">
+                      {t('listings.title')} <span className="text-destructive">*</span>
+                    </Label>
+                    <span className={`text-xs tabular-nums ${formData.title.length > 60 ? 'text-destructive' : formData.title.length < 10 ? 'text-muted-foreground/50' : 'text-muted-foreground'}`}>
+                      {formData.title.length}/60
+                    </span>
+                  </div>
                   <Input
                     id="title"
                     name="title"
                     required
+                    maxLength={60}
                     placeholder={t('listings.titlePlaceholder')}
                     value={formData.title}
                     onChange={handleChange}
@@ -226,20 +263,27 @@ const ListingForm = () => {
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-semibold">
-                    {t('listings.description')}
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="description" className="text-sm font-semibold">
+                      {t('listings.description')} <span className="text-destructive">*</span>
+                    </Label>
+                    <span className={`text-xs tabular-nums ${formData.description.length > 300 ? 'text-destructive' : formData.description.length < 30 ? 'text-muted-foreground/50' : 'text-emerald-500'}`}>
+                      {formData.description.length}/300
+                    </span>
+                  </div>
                   <Textarea
                     id="description"
                     name="description"
+                    required
                     rows={4}
+                    maxLength={300}
                     placeholder={t('listings.descriptionPlaceholder')}
                     value={formData.description}
                     onChange={handleChange}
                     disabled={isLimitReached}
                     className="bg-background resize-none"
                   />
-                  <p className="text-xs text-muted-foreground">{t('listings.descriptionHelper')}</p>
+                  <p className="text-xs text-muted-foreground">{t('listings.descriptionHelper')} &nbsp;·&nbsp; min 30, max 300</p>
                 </div>
 
                 {/* Category & Condition */}
@@ -258,7 +302,7 @@ const ListingForm = () => {
                         <SelectValue placeholder={t('listings.categoryPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        {LISTING_CATEGORIES.map(c => <SelectItem key={c} value={c}>{td(c)}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground">{t('listings.categoryHelper')}</p>
@@ -278,7 +322,7 @@ const ListingForm = () => {
                         <SelectValue placeholder={t('listings.conditionPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        {conditions.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        {LISTING_CONDITIONS.map(c => <SelectItem key={c} value={c}>{td(c)}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground">{t('listings.conditionHelper')}</p>
@@ -350,36 +394,62 @@ const ListingForm = () => {
                 )}
 
                 {/* Images */}
-                <div className="space-y-2">
-                  <Label htmlFor="images" className="text-sm font-semibold">
-                    {t('listings.images')}
-                  </Label>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold">{t('listings.images')}</Label>
+                    <span className="text-xs text-muted-foreground/60">{images.length}/{MAX_IMAGES}</span>
+                  </div>
+
                   {isEditMode && existingImages.length > 0 && images.length === 0 && (
                     <p className="text-xs text-muted-foreground">
                       {existingImages.length} {existingImages.length === 1 ? 'photo' : 'photos'} currently attached — upload new photos to replace them
                     </p>
                   )}
-                  <label
-                    htmlFor="images"
-                    className={`flex flex-col items-center justify-center gap-2 w-full py-8 border-2 border-dashed rounded-xl transition-colors cursor-pointer ${isLimitReached ? 'opacity-50 cursor-not-allowed border-border' : 'border-border hover:border-primary/50 hover:bg-primary/5'}`}
-                  >
-                    <Upload className="w-6 h-6 text-muted-foreground" />
-                    <span className="text-sm font-medium text-foreground">
-                      {images.length > 0
-                        ? t('listings.filesSelected')?.replace('{count}', images.length)
-                        : t('listings.uploadPhotos')}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{t('listings.uploadFormats')}</span>
-                    <Input
-                      id="images"
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      disabled={isLimitReached}
-                      className="hidden"
-                    />
-                  </label>
+
+                  {/* Upload zone */}
+                  {images.length < MAX_IMAGES && (
+                    <label
+                      htmlFor="images"
+                      className={`flex flex-col items-center justify-center gap-2 w-full py-7 border-2 border-dashed rounded-xl transition-colors cursor-pointer ${isLimitReached ? 'opacity-50 cursor-not-allowed border-border' : 'border-border hover:border-primary/50 hover:bg-primary/5'}`}
+                    >
+                      <Upload className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">{t('listings.uploadPhotos')}</span>
+                      <span className="text-xs text-muted-foreground">{t('listings.uploadFormats')} &nbsp;·&nbsp; max {MAX_IMAGES} photos</span>
+                      <Input
+                        id="images"
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        disabled={isLimitReached}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+
+                  {/* Previews */}
+                  {imagePreviews.length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-1">
+                      {imagePreviews.map((url, i) => (
+                        <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-white/8 bg-[#111]">
+                          <img src={url} alt="" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(i)}
+                            className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium"
+                          >
+                            ✕
+                          </button>
+                          {i === 0 && (
+                            <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-primary text-black px-1.5 py-0.5 rounded">
+                              Cover
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <p className="text-xs text-muted-foreground">{t('listings.imagesHelper')}</p>
                 </div>
 

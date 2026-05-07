@@ -6,7 +6,9 @@
     "description": "Perfect for car enthusiasts",
     "adLimit": "3 Ads limit",
     "listingType": "Showcase Only",
-    "messaging": "No Messaging",
+    "messaging": "Messaging Enabled",
+    "depositRequest": "Deposit Request",
+    "priorityRequest": "Priority Request",
     "icon": "👁️",
     "badge": ""
   },
@@ -17,6 +19,8 @@
     "adLimit": "3 Ads limit",
     "listingType": "Sell or Showcase",
     "messaging": "Messaging Enabled",
+    "depositRequest": "Deposit Request",
+    "priorityRequest": "Priority Request",
     "icon": "🔧",
     "badge": ""
   },
@@ -27,6 +31,8 @@
     "adLimit": "7 Ads limit",
     "listingType": "Sell or Showcase",
     "messaging": "Messaging Enabled",
+    "depositRequest": "Deposit Request",
+    "priorityRequest": "Priority Request",
     "icon": "🛒",
     "badge": ""
   },
@@ -37,6 +43,8 @@
     "adLimit": "21 Ads limit",
     "listingType": "Sell or Showcase",
     "messaging": "Messaging Enabled",
+    "depositRequest": "Deposit Request",
+    "priorityRequest": "Priority Request",
     "icon": "⭐",
     "badge": "Priority Approval"
   },
@@ -56,7 +64,9 @@
         "description": "Free - Showcase only, 3 Ads",
         "adLimit": "3 Ads limit",
         "listingType": "Showcase Only",
-        "messaging": "No Messaging"
+        "messaging": "Messaging Enabled",
+        "depositRequest": "Deposit Request",
+        "priorityRequest": "Priority Request"
       },
       "hobbyist": {
         "name": "Hobbyist",
@@ -64,7 +74,9 @@
         "description": "1,000 IQD - Sell or Showcase, 3 Ads",
         "adLimit": "3 Ads limit",
         "listingType": "Sell or Showcase",
-        "messaging": "Messaging Enabled"
+        "messaging": "Messaging Enabled",
+        "depositRequest": "Deposit Request",
+        "priorityRequest": "Priority Request"
       },
       "collector": {
         "name": "Collector",
@@ -72,7 +84,9 @@
         "description": "7,000 IQD - Sell or Showcase, 7 Ads",
         "adLimit": "7 Ads limit",
         "listingType": "Sell or Showcase",
-        "messaging": "Messaging Enabled"
+        "messaging": "Messaging Enabled",
+        "depositRequest": "Deposit Request",
+        "priorityRequest": "Priority Request"
       },
       "dealer": {
         "name": "Dealer",
@@ -80,7 +94,9 @@
         "description": "15,000 IQD - Sell or Showcase, 21 Ads",
         "adLimit": "21 Ads limit",
         "listingType": "Sell or Showcase",
-        "messaging": "Messaging Enabled"
+        "messaging": "Messaging Enabled",
+        "depositRequest": "Deposit Request",
+        "priorityRequest": "Priority Request"
       }
     }
   }
