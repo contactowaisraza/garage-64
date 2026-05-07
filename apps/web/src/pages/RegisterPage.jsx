@@ -69,7 +69,7 @@ const RegisterPage = () => {
 
       await login(formData.email, formData.password);
       toast.success(isRTL ? 'تم التسجيل بنجاح' : 'Registration successful');
-      navigate('/bazar');
+      navigate('/profile');
 
     } catch (error) {
       console.error('Signup error:', error);
