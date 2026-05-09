@@ -19,7 +19,6 @@ import ListingDetailPage from '@/pages/ListingDetailPage.jsx';
 import MyListingsPage from '@/pages/MyListingsPage.jsx';
 import ListingForm from '@/pages/ListingForm.jsx';
 import MessagesPage from '@/pages/MessagesPage.jsx';
-import ChatDetailPage from '@/pages/ChatDetailPage.jsx';
 import PaymentHistoryPage from '@/pages/PaymentHistoryPage.jsx';
 import DiecastCategoryPage from '@/pages/DiecastCategoryPage.jsx';
 import DiecastBrandListingsPage from '@/pages/DiecastBrandListingsPage.jsx';
@@ -56,7 +55,7 @@ function App() {
               <Route path="/create-listing" element={<ProtectedSubscriptionRoute><ListingForm /></ProtectedSubscriptionRoute>} />
               <Route path="/edit-listing/:id" element={<ProtectedSubscriptionRoute><ListingForm /></ProtectedSubscriptionRoute>} />
               <Route path="/messages" element={<ProtectedSubscriptionRoute><MessagesPage /></ProtectedSubscriptionRoute>} />
-              <Route path="/messages/:conversationId" element={<ProtectedSubscriptionRoute><ChatDetailPage /></ProtectedSubscriptionRoute>} />
+              <Route path="/messages/:conversationId" element={<ProtectedSubscriptionRoute><MessagesPage /></ProtectedSubscriptionRoute>} />
               <Route path="/payment-history" element={<ProtectedSubscriptionRoute><PaymentHistoryPage /></ProtectedSubscriptionRoute>} />
               <Route path="/favorites" element={<ProtectedSubscriptionRoute><FavoritesPage /></ProtectedSubscriptionRoute>} />
               
