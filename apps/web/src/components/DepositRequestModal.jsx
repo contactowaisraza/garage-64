@@ -25,23 +25,30 @@ const DepositRequestModal = ({ isOpen, onClose, conversationId, currentUserId, o
 
     setLoading(true);
     try {
-      // Create deposit record
-      await pb.collection('deposits').create({
+      // Seller (currentUser) requests a deposit from the buyer (otherUser)
+      const deposit = await pb.collection('deposits').create({
         conversation_id: conversationId,
-        buyer_id: currentUserId, // As requested: buyer_id: currentUser.id
-        seller_id: otherUserId,  // seller_id: recipientId
+        seller_id: currentUserId,
+        buyer_id: otherUserId,
         amount: Number(amount),
         status: 'pending',
         notes: notes.trim()
       }, { $autoCancel: false });
 
-      // Send the automated chat message
+      // Encode deposit ID so the message card can look up the record
+      const depositContent = `DEPOSIT_REQ|${deposit.id}|${amount}`;
       await pb.collection('messages').create({
         conversation_id: conversationId,
         sender_id: currentUserId,
         recipient_id: otherUserId,
-        content: `Deposit Request: ${amount} QI`
+        content: depositContent,
       }, { $autoCancel: false });
+
+      // Update conversation last_message
+      pb.collection('conversations').update(conversationId, {
+        last_message: depositContent,
+        last_message_sender_id: currentUserId,
+      }, { $autoCancel: false }).catch(() => {});
 
       toast.success(isRTL ? 'تم إرسال طلب العربون بنجاح' : 'Deposit request sent successfully');
       setAmount('');
